@@ -3,6 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '../types';
 import api from '../services/api';
 
+const getTomorrowDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+
 const TaskRow: React.FC<{ 
   task: Task; 
   onStatusToggle: (task: Task) => void;
@@ -50,7 +56,7 @@ const TasksPage: React.FC = () => {
   const [filter, setFilter] = useState<TaskStatus | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'MEDIUM', status: TaskStatus.TODO, dueDate: '' });
+  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'MEDIUM', status: TaskStatus.TODO, dueDate: getTomorrowDate() });
 
   useEffect(() => {
     fetchTasks();
@@ -100,7 +106,7 @@ const TasksPage: React.FC = () => {
       const response = await api.post('/tasks', newTask);
       setTasks([...tasks, response.data]);
       setIsModalOpen(false);
-      setNewTask({ title: '', description: '', priority: 'MEDIUM', status: TaskStatus.TODO, dueDate: '' });
+      setNewTask({ title: '', description: '', priority: 'MEDIUM', status: TaskStatus.TODO, dueDate: getTomorrowDate() });
     } catch (err) {
       alert("Encryption error or session expired.");
     }
@@ -140,8 +146,25 @@ const TasksPage: React.FC = () => {
         {filteredTasks.length > 0 ? (
           filteredTasks.map(task => <TaskRow key={task.id} task={task} onStatusToggle={handleStatusToggle} onDelete={handleDelete} />)
         ) : (
-          <div className="h-64 flex flex-col items-center justify-center dark:bg-oled-card bg-white border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[3rem] text-gray-500 space-y-4">
-            <p className="font-black uppercase tracking-[0.2em] text-xs">Sector clear. No tasks detected.</p>
+          <div className="h-[450px] flex flex-col items-center justify-center dark:bg-oled-card bg-white border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[4rem] text-center p-12 animate-fade-in">
+            <div className="relative mb-10">
+              <div className="absolute inset-0 bg-indigo-500/20 blur-[80px] rounded-full scale-150 animate-pulse"></div>
+              <div className="relative w-24 h-24 dark:bg-oled-surface bg-gray-50 border dark:border-oled-border border-gray-200 rounded-[2rem] flex items-center justify-center shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-3xl font-black dark:text-white text-gray-900 tracking-tighter mb-4">Strategic Clearance.</h3>
+            <p className="max-w-md text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-10">
+              No mission-critical tasks detected in this sector. This is your chance to initialize a new execution protocol.
+            </p>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-10 py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-[11px] transition-transform active:scale-95"
+            >
+              Launch First Execution
+            </button>
           </div>
         )}
       </div>
@@ -158,41 +181,53 @@ const TasksPage: React.FC = () => {
               </button>
             </div>
             <form onSubmit={handleAddTask} className="p-12 space-y-10">
-              <input 
-                required 
-                value={newTask.title} 
-                onChange={e => setNewTask({...newTask, title: e.target.value})} 
-                className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-bold text-lg" 
-                placeholder="Task Name" 
-              />
-              <textarea 
-                rows={3} 
-                value={newTask.description} 
-                onChange={e => setNewTask({...newTask, description: e.target.value})} 
-                className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-medium resize-none" 
-                placeholder="Requirements..." 
-              />
-              <div className="grid grid-cols-2 gap-8">
-                <select 
-                  value={newTask.priority} 
-                  onChange={e => setNewTask({...newTask, priority: e.target.value})} 
-                  className="px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-black uppercase tracking-widest text-[11px]"
-                >
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                </select>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Objective Name</label>
                 <input 
-                  type="text" 
-                  value={newTask.dueDate} 
-                  onChange={e => setNewTask({...newTask, dueDate: e.target.value})} 
-                  className="px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold" 
-                  placeholder="Due Date (Dec 25)" 
+                  required 
+                  value={newTask.title} 
+                  onChange={e => setNewTask({...newTask, title: e.target.value})} 
+                  className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-bold text-lg focus:border-indigo-500 transition-colors" 
+                  placeholder="Task Name" 
                 />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Protocol Details</label>
+                <textarea 
+                  rows={3} 
+                  value={newTask.description} 
+                  onChange={e => setNewTask({...newTask, description: e.target.value})} 
+                  className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-medium resize-none focus:border-indigo-500 transition-colors" 
+                  placeholder="Requirements..." 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Priority Tier</label>
+                  <select 
+                    value={newTask.priority} 
+                    onChange={e => setNewTask({...newTask, priority: e.target.value})} 
+                    className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-black uppercase tracking-widest text-[11px] focus:border-indigo-500 transition-colors"
+                  >
+                    <option value="LOW">Low Impact</option>
+                    <option value="MEDIUM">Medium Priority</option>
+                    <option value="HIGH">Critical Path</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={newTask.dueDate} 
+                    onChange={e => setNewTask({...newTask, dueDate: e.target.value})} 
+                    className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold focus:border-indigo-500 transition-colors" 
+                  />
+                </div>
               </div>
               <button 
                 type="submit" 
-                className="w-full py-6 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow uppercase tracking-[0.2em] text-sm mt-8"
+                className="w-full py-6 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow uppercase tracking-[0.2em] text-sm mt-8 transition-transform active:scale-95 shadow-2xl shadow-indigo-500/30"
               >
                 Launch Execution
               </button>
