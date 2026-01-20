@@ -6,8 +6,10 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import TasksPage from './pages/TasksPage';
+import StudyAssistant from './pages/StudyAssistant';
 import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
+import api from './services/api';
 
 interface ThemeContextType {
   isDarkMode: boolean;
@@ -36,22 +38,34 @@ export const useAuth = () => {
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode, adminOnly?: boolean }> = ({ children, adminOnly = false }) => {
   const { auth } = useAuth();
-  if (auth.loading) return <div className="flex h-screen items-center justify-center dark:bg-black dark:text-white">Loading...</div>;
+  
+  if (auth.loading) {
+    return (
+      <div className="flex h-screen items-center justify-center dark:bg-black bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-black dark:text-white text-gray-900 uppercase tracking-widest text-xs">DayOne Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (!auth.isAuthenticated) return <Navigate to="/login" replace />;
   if (adminOnly && auth.user?.role !== UserRole.ADMIN) return <Navigate to="/dashboard" replace />;
+  
   return <>{children}</>;
 };
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : true; // Default to dark mode
+    return saved ? saved === 'dark' : true;
   });
 
   const [auth, setAuth] = useState<AuthState>({
     user: null,
-    token: localStorage.getItem('token'),
-    isAuthenticated: !!localStorage.getItem('token'),
+    token: null,
+    isAuthenticated: false,
     loading: true,
   });
 
@@ -71,19 +85,21 @@ const App: React.FC = () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          // Simulation of session check
+          // Verify token and get user info on every app load/refresh
+          const response = await api.get('/auth/me');
           setAuth({
-            user: { id: '1', email: 'demo@dayone.com', name: 'Demo User', role: UserRole.ADMIN },
+            user: response.data,
             token,
             isAuthenticated: true,
             loading: false,
           });
         } catch (err) {
+          console.error("Session verification failed", err);
           localStorage.removeItem('token');
           setAuth({ user: null, token: null, isAuthenticated: false, loading: false });
         }
       } else {
-        setAuth(prev => ({ ...prev, loading: false }));
+        setAuth({ user: null, token: null, isAuthenticated: false, loading: false });
       }
     };
     initAuth();
@@ -125,6 +141,14 @@ const App: React.FC = () => {
                   element={
                     <ProtectedRoute>
                       <TasksPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/study" 
+                  element={
+                    <ProtectedRoute>
+                      <StudyAssistant />
                     </ProtectedRoute>
                   } 
                 />

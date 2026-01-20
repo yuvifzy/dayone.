@@ -14,6 +14,20 @@ const Navbar: React.FC = () => {
     navigate('/');
   };
 
+  // Safe name extraction with fallback
+  const getUserInitial = () => {
+    if (!auth.user || !auth.user.name) return '?';
+    try {
+      return String(auth.user.name).charAt(0).toUpperCase();
+    } catch (e) {
+      return '?';
+    }
+  };
+
+  const getUserName = () => {
+    return auth.user?.name || 'Operator';
+  };
+
   return (
     <nav className="border-b transition-colors duration-300 dark:bg-black dark:border-oled-border bg-white border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-[60]">
       <Link to="/" className="flex items-center gap-3 group">
@@ -40,19 +54,25 @@ const Navbar: React.FC = () => {
 
         {auth.isAuthenticated ? (
           <>
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden lg:flex items-center gap-8">
               <Link to="/dashboard" className="text-[13px] font-bold text-gray-400 dark:text-gray-500 hover:text-[#4f46e5] transition-colors uppercase tracking-widest">Dashboard</Link>
               <Link to="/tasks" className="text-[13px] font-bold text-gray-400 dark:text-gray-500 hover:text-[#4f46e5] transition-colors uppercase tracking-widest">Tasks</Link>
+              <Link to="/study" className="text-[13px] font-bold text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 transition-colors uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                Study AI
+              </Link>
               {auth.user?.role === UserRole.ADMIN && (
                 <Link to="/admin" className="text-[13px] font-bold text-gray-400 dark:text-gray-500 hover:text-[#4f46e5] transition-colors uppercase tracking-widest">Admin</Link>
               )}
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 px-4 py-2 dark:bg-oled-surface bg-gray-50 rounded-full border dark:border-oled-border border-gray-100">
+              <div className="flex items-center gap-3 px-4 py-2 dark:bg-oled-surface bg-gray-50 rounded-full border dark:border-oled-border border-gray-100 min-w-[40px]">
                 <div className="w-6 h-6 rounded-full bg-indigo-200 dark:bg-indigo-900/40 flex items-center justify-center text-[10px] text-[#4f46e5] dark:text-indigo-400 font-bold">
-                  {auth.user?.name.charAt(0)}
+                  {getUserInitial()}
                 </div>
-                <span className="text-[13px] font-bold dark:text-gray-300 text-gray-600 hidden sm:inline">{auth.user?.name}</span>
+                <span className="text-[13px] font-bold dark:text-gray-300 text-gray-600 hidden sm:inline">
+                  {getUserName()}
+                </span>
               </div>
               <button 
                 onClick={handleLogout}

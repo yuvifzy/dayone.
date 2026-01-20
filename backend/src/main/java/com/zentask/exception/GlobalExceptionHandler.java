@@ -30,8 +30,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneric(Exception ex) {
+        ex.printStackTrace(); // Keep for internal logs
         Map<String, String> error = new HashMap<>();
-        error.put("message", "An internal server error occurred");
+        error.put("message", "An unexpected error occurred in the DayOne terminal.");
         error.put("status", "500");
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

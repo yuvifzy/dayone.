@@ -6,6 +6,7 @@ import com.zentask.dto.TaskResponse;
 import com.zentask.entity.Task;
 import com.zentask.entity.User;
 import com.zentask.exception.ResourceNotFoundException;
+import com.zentask.exception.UnauthorizedException;
 import com.zentask.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +21,16 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
+    private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        }
+        throw new UnauthorizedException("User identity could not be verified in secure context.");
+    }
+
     public List<TaskResponse> getUserTasks() {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = getCurrentUser();
         return taskRepository.findByUserId(currentUser.getId())
                 .stream()
                 .map(this::mapToResponse)
@@ -29,7 +38,7 @@ public class TaskService {
     }
 
     public TaskResponse createTask(TaskRequest request) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = getCurrentUser();
         Task task = Task.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -42,8 +51,14 @@ public class TaskService {
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
+        User currentUser = getCurrentUser();
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + id));
+        
+        // Strict ownership check
+        if (!task.getUser().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("Access denied. Resource belongs to another operator.");
+        }
         
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -55,7 +70,15 @@ public class TaskService {
     }
 
     public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
+        User currentUser = getCurrentUser();
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + id));
+
+        if (!task.getUser().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("Deletion denied. Resource belongs to another operator.");
+        }
+
+        taskRepository.delete(task);
     }
 
     private TaskResponse mapToResponse(Task task) {
