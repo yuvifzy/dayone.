@@ -1,11 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 
 /**
  * AIResponseRenderer
  * A dedicated component for high-performance, structured text rendering.
- * Supports: Headers, Lists, Bold Emphasis, and Protocol Keywords.
  */
 const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
   const lines = text.split('\n');
@@ -16,7 +15,6 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={idx} className="h-4" />;
 
-        // Helper for bold text processing
         const renderBold = (str: string) => {
           const parts = str.split(/(\*\*.*?\*\*)/g);
           return parts.map((part, i) => {
@@ -31,7 +29,6 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
           });
         };
 
-        // Header Check (Markdown # or ##)
         if (line.startsWith('#')) {
           const level = line.match(/^#+/)?.[0].length || 1;
           const content = line.replace(/^#+\s*/, '');
@@ -41,7 +38,6 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
           return <h3 key={idx} className={`${baseStyle} text-xl text-indigo-400 border-b dark:border-white/5 pb-2`}>{renderBold(content)}</h3>;
         }
 
-        // Protocol Keywords Check (Specific to the prompt instruction)
         const isKeywordHeader = trimmed.match(/^(STRATEGIC SUMMARY|TECHNICAL DRILL|THE DAILY ROUTINE|THE ROUTINE|SUMMARY|TECHNIQUES|EXECUTION PROTOCOL):/i);
         if (isKeywordHeader) {
           return (
@@ -57,7 +53,6 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
           );
         }
 
-        // List Check (Bullet points)
         if (trimmed.match(/^[\-\*•]\s+/)) {
           return (
             <div key={idx} className="flex gap-4 pl-4 items-start group">
@@ -69,7 +64,6 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
           );
         }
 
-        // Numbered List Check
         if (trimmed.match(/^\d+\.\s+/)) {
           const num = trimmed.match(/^\d+/)?.[0];
           return (
@@ -84,7 +78,6 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
           );
         }
 
-        // Default Paragraph
         return (
           <p key={idx} className="leading-relaxed text-gray-600 dark:text-gray-300 font-medium text-base">
             {renderBold(line)}
@@ -95,13 +88,49 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
+const getTomorrowDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+
 const StudyAssistant: React.FC = () => {
   const [struggle, setStruggle] = useState('');
-  const [examDate, setExamDate] = useState('');
+  const [examDate, setExamDate] = useState(getTomorrowDate());
   const [subjectType, setSubjectType] = useState('theory');
   const [timeAvailable, setTimeAvailable] = useState('2');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
+
+  // Persistence logic
+  useEffect(() => {
+    const savedResponse = localStorage.getItem('dayone_study_response');
+    const savedParams = localStorage.getItem('dayone_study_params');
+    
+    if (savedResponse) setResponse(savedResponse);
+    if (savedParams) {
+      const params = JSON.parse(savedParams);
+      setStruggle(params.struggle || '');
+      setExamDate(params.examDate || getTomorrowDate());
+      setSubjectType(params.subjectType || 'theory');
+      setTimeAvailable(params.timeAvailable || '2');
+    }
+  }, []);
+
+  const saveToPersistence = (res: string | null) => {
+    if (res) {
+      localStorage.setItem('dayone_study_response', res);
+      localStorage.setItem('dayone_study_params', JSON.stringify({
+        struggle,
+        examDate,
+        subjectType,
+        timeAvailable
+      }));
+    } else {
+      localStorage.removeItem('dayone_study_response');
+      localStorage.removeItem('dayone_study_params');
+    }
+  };
 
   const generateStrategy = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +144,7 @@ const StudyAssistant: React.FC = () => {
       const prompt = `
         STRATEGIC CONTEXT:
         - Struggle: ${struggle}
-        - Exam Date: ${examDate || 'Not specified'}
+        - Exam Date: ${examDate}
         - Subject Focus: ${subjectType}
         - Daily Capacity: ${timeAvailable} hours
 
@@ -139,13 +168,20 @@ const StudyAssistant: React.FC = () => {
         },
       });
 
-      setResponse(result.text || 'Protocol generation failed. Retry.');
+      const text = result.text || 'Protocol generation failed. Retry.';
+      setResponse(text);
+      saveToPersistence(text);
     } catch (err) {
       console.error("AI Strategic Failure:", err);
       setResponse("AI TERMINAL OFFLINE. Check credentials and retry.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    setResponse(null);
+    saveToPersistence(null);
   };
 
   return (
@@ -160,9 +196,8 @@ const StudyAssistant: React.FC = () => {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Input Configuration */}
         <div className="lg:col-span-1 space-y-8">
-          <form onSubmit={generateStrategy} className="dark:bg-oled-card bg-white p-10 rounded-[3rem] border dark:border-oled-border border-gray-100 shadow-sm space-y-8">
+          <form onSubmit={generateStrategy} className="glass-panel p-10 rounded-[3rem] border dark:border-oled-border border-gray-100 shadow-sm space-y-8">
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">The Friction</label>
               <textarea 
@@ -170,7 +205,7 @@ const StudyAssistant: React.FC = () => {
                 value={struggle}
                 onChange={e => setStruggle(e.target.value)}
                 placeholder="Ex: I can't focus on complex theory for more than 10 minutes..."
-                className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-medium resize-none min-h-[120px] focus:border-indigo-500 transition-colors"
+                className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none min-h-[120px] focus:border-indigo-500 transition-colors"
               />
             </div>
 
@@ -179,7 +214,7 @@ const StudyAssistant: React.FC = () => {
               <select 
                 value={subjectType}
                 onChange={e => setSubjectType(e.target.value)}
-                className="w-full px-6 py-4 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold uppercase tracking-widest text-[11px]"
+                className="w-full px-6 py-4 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold uppercase tracking-widest text-[11px] focus:border-indigo-500 transition-colors"
               >
                 <option value="theory">Conceptual / Theory</option>
                 <option value="problem-heavy">Problem Solving / Logic</option>
@@ -193,19 +228,22 @@ const StudyAssistant: React.FC = () => {
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Daily Cap (Hrs)</label>
                 <input 
                   type="number" 
+                  min="0.5"
+                  step="0.5"
+                  required
                   value={timeAvailable}
                   onChange={e => setTimeAvailable(e.target.value)}
-                  className="w-full px-6 py-4 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold"
+                  className="w-full px-6 py-4 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold focus:border-indigo-500 transition-colors"
                 />
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
                 <input 
-                  type="text" 
-                  placeholder="2 Weeks"
+                  type="date" 
+                  required
                   value={examDate}
                   onChange={e => setExamDate(e.target.value)}
-                  className="w-full px-6 py-4 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold placeholder:font-normal"
+                  className="w-full px-6 py-4 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold focus:border-indigo-500 transition-colors"
                 />
               </div>
             </div>
@@ -213,17 +251,16 @@ const StudyAssistant: React.FC = () => {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-xs mt-4 disabled:opacity-50"
+              className="w-full py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-xs mt-4 disabled:opacity-50 transition-transform active:scale-95"
             >
               {loading ? 'Optimizing Strategy...' : 'Analyze & Solve'}
             </button>
           </form>
         </div>
 
-        {/* AI Output Terminal */}
         <div className="lg:col-span-2 h-full min-h-[500px]">
           {!response && !loading && (
-            <div className="h-full flex flex-col items-center justify-center dark:bg-oled-card bg-white border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[3rem] text-center p-12 space-y-4">
+            <div className="h-full flex flex-col items-center justify-center glass-panel border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[3rem] text-center p-12 space-y-4">
               <div className="text-5xl opacity-40">⚡</div>
               <p className="font-black uppercase tracking-[0.2em] text-xs text-gray-400">Terminal Ready for Diagnosis</p>
               <p className="text-gray-500 text-sm font-medium">Configure your constraints and launch the analysis engine.</p>
@@ -231,7 +268,7 @@ const StudyAssistant: React.FC = () => {
           )}
 
           {loading && (
-            <div className="h-full flex flex-col items-center justify-center dark:bg-oled-card bg-white border dark:border-oled-border border-gray-100 rounded-[3rem] p-12 space-y-8 animate-pulse">
+            <div className="h-full flex flex-col items-center justify-center glass-panel border dark:border-oled-border border-gray-100 rounded-[3rem] p-12 space-y-8 animate-pulse">
               <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
               <div className="space-y-3 text-center">
                 <p className="font-black uppercase tracking-[0.2em] text-xs text-indigo-500">Engaging Gemini Flash Lite</p>
@@ -241,7 +278,7 @@ const StudyAssistant: React.FC = () => {
           )}
 
           {response && !loading && (
-            <div className="dark:bg-oled-card bg-white p-12 rounded-[3rem] border dark:border-oled-border border-gray-100 shadow-xl space-y-8 animate-fade-in overflow-hidden relative group h-full">
+            <div className="glass-panel p-12 rounded-[3rem] border dark:border-oled-border border-gray-100 shadow-xl space-y-8 animate-fade-in overflow-hidden relative group h-full">
               <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none group-hover:opacity-[0.06] transition-opacity">
                 <span className="text-[12rem] font-black">AI</span>
               </div>
@@ -264,8 +301,8 @@ const StudyAssistant: React.FC = () => {
                 </div>
                 
                 <button 
-                  onClick={() => setResponse(null)}
-                  className="mt-10 w-fit px-10 py-4 dark:bg-oled-surface bg-gray-50 border dark:border-oled-border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-white hover:bg-indigo-500 hover:border-indigo-500 transition-all active:scale-[0.98]"
+                  onClick={handleReset}
+                  className="mt-10 w-fit px-10 py-4 glass-panel border dark:border-oled-border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-white hover:bg-indigo-500 hover:border-indigo-500 transition-all active:scale-[0.98]"
                 >
                   Reset Terminal
                 </button>

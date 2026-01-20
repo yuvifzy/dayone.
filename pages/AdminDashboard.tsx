@@ -22,23 +22,23 @@ const AdminDashboard: React.FC = () => {
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="dark:bg-oled-card bg-white p-8 rounded-[2rem] border transition-all dark:border-oled-border border-gray-100 shadow-sm hover:translate-y-[-2px] duration-300">
+        <div className="glass-panel p-8 rounded-[2rem] border transition-all dark:border-oled-border border-gray-100 shadow-sm hover:translate-y-[-2px] duration-300">
           <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">Total Operators</p>
           <p className="text-5xl font-black dark:text-white text-gray-900 leading-none tracking-tighter">{users.length}</p>
         </div>
-        <div className="dark:bg-oled-card bg-white p-8 rounded-[2rem] border transition-all dark:border-oled-border border-gray-100 shadow-sm hover:translate-y-[-2px] duration-300">
+        <div className="glass-panel p-8 rounded-[2rem] border transition-all dark:border-oled-border border-gray-100 shadow-sm hover:translate-y-[-2px] duration-300">
           <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">System Integrity</p>
           <p className="text-5xl font-black text-emerald-500 leading-none tracking-tighter">99.9%</p>
         </div>
-        <div className="dark:bg-oled-card bg-white p-8 rounded-[2rem] border transition-all dark:border-oled-border border-gray-100 shadow-sm hover:translate-y-[-2px] duration-300">
+        <div className="glass-panel p-8 rounded-[2rem] border transition-all dark:border-oled-border border-gray-100 shadow-sm hover:translate-y-[-2px] duration-300">
           <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">API Throughput</p>
           <p className="text-5xl font-black text-indigo-500 leading-none tracking-tighter">1.2k</p>
         </div>
       </div>
 
       {/* User Table Section */}
-      <div className="dark:bg-oled-card bg-white rounded-[2.5rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-10 py-6 border-b dark:border-oled-border border-gray-50 dark:bg-oled-surface bg-gray-50/50">
+      <div className="glass-panel rounded-[2.5rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-10 py-6 border-b dark:border-oled-border border-gray-50 dark:bg-transparent bg-gray-50/50">
           <h3 className="text-lg font-black dark:text-white text-gray-800 tracking-tight">Access Management</h3>
         </div>
         <div className="overflow-x-auto">

@@ -4,6 +4,7 @@ import { Task, TaskStatus } from '../types';
 import { GoogleGenAI } from "@google/genai";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../services/api';
+import { useAuth } from '../App';
 
 const getTomorrowDate = () => {
   const tomorrow = new Date();
@@ -11,7 +12,12 @@ const getTomorrowDate = () => {
   return tomorrow.toISOString().split('T')[0];
 };
 
+const getTodayDate = () => {
+  return new Date().toISOString().split('T')[0];
+};
+
 const Dashboard: React.FC = () => {
+  const { auth } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,10 +39,13 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const todayDate = getTodayDate();
+  const tasksDueToday = tasks.filter(t => t.dueDate === todayDate);
+
   const statsData = [
-    { name: 'Todo', count: tasks.filter(t => t.status === TaskStatus.TODO).length, color: '#94a3b8' },
-    { name: 'In Progress', count: tasks.filter(t => t.status === TaskStatus.IN_PROGRESS).length, color: '#4f46e5' },
-    { name: 'Done', count: tasks.filter(t => t.status === TaskStatus.DONE).length, color: '#10b981' },
+    { name: 'Low Priority', count: tasks.filter(t => t.priority === 'LOW').length, color: '#10b981' },
+    { name: 'Medium Priority', count: tasks.filter(t => t.priority === 'MEDIUM').length, color: '#4f46e5' },
+    { name: 'High Priority', count: tasks.filter(t => t.priority === 'HIGH').length, color: '#f43f5e' },
   ];
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
@@ -81,14 +90,21 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-gray-500 animate-pulse">Initializing Data Stream...</div>;
+  const getUserFirstName = () => {
+    if (!auth.user?.name) return 'Operator';
+    return auth.user.name.split(' ')[0];
+  };
+
+  if (loading) return <div className="p-8 text-gray-500 animate-pulse">Initializing Data stream...</div>;
 
   return (
     <div className="p-8 max-w-[1600px] mx-auto space-y-12 animate-fade-in">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-5xl font-black transition-colors dark:text-white text-gray-900 tracking-tighter">DayOne Workspace</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-base mt-2 font-medium">Strategic project visualization and execution</p>
+          <p className="text-gray-500 dark:text-gray-400 text-base mt-2 font-medium flex items-center gap-2">
+            Welcome back, <span className="text-indigo-500 dark:text-indigo-400 font-bold">{getUserFirstName()}</span>. Terminal ready for operation.
+          </p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -99,15 +115,20 @@ const Dashboard: React.FC = () => {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="dark:bg-oled-card bg-white p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm flex flex-col justify-center min-h-[180px]">
-          <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">Velocity</p>
+        {/* Today's Tasks Metric */}
+        <div className="glass-panel p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm flex flex-col justify-center min-h-[180px]">
+          <p className="text-xs font-black text-indigo-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+            Today's Tasks
+          </p>
           <div className="flex items-baseline gap-2">
-            <p className="text-6xl font-black dark:text-white text-gray-900 leading-none tracking-tighter">{tasks.length}</p>
+            <p className="text-6xl font-black dark:text-white text-gray-900 leading-none tracking-tighter">{tasksDueToday.length}</p>
             <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Active</span>
           </div>
         </div>
         
-        <div className="dark:bg-oled-card bg-white p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm flex flex-col justify-center min-h-[180px]">
+        {/* Efficiency Metric */}
+        <div className="glass-panel p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm flex flex-col justify-center min-h-[180px]">
           <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">Efficiency</p>
           <div className="flex items-baseline gap-2">
             <p className="text-6xl font-black text-[#4f46e5] dark:text-indigo-400 leading-none tracking-tighter">
@@ -116,7 +137,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-2 dark:bg-oled-card bg-white p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm min-h-[220px]">
+        {/* Priority Distribution Chart */}
+        <div className="lg:col-span-2 glass-panel p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm min-h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={statsData} margin={{ top: 0, right: 0, left: -40, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
@@ -139,14 +161,14 @@ const Dashboard: React.FC = () => {
                 <div className={`w-1.5 h-1.5 rounded-full ${status === TaskStatus.TODO ? 'bg-gray-400' : status === TaskStatus.IN_PROGRESS ? 'bg-indigo-500' : 'bg-emerald-500'}`} />
                 <h3 className="font-black dark:text-white text-gray-800 uppercase tracking-[0.2em] text-[11px]">{status.replace('_', ' ')}</h3>
               </div>
-              <span className="dark:bg-oled-card bg-gray-100 dark:text-gray-400 text-gray-500 text-[10px] font-black px-3 py-1 rounded-full border dark:border-oled-border">
+              <span className="glass-panel dark:text-gray-400 text-gray-500 text-[10px] font-black px-3 py-1 rounded-full border dark:border-oled-border">
                 {tasks.filter(t => t.status === status).length}
               </span>
             </div>
             
             <div className="space-y-6 kanban-column max-h-[70vh] overflow-y-auto pr-2">
               {tasks.filter(t => t.status === status).map(task => (
-                <div key={task.id} className="dark:bg-oled-card bg-white p-7 rounded-[2rem] shadow-sm border transition-all duration-300 dark:border-oled-border border-gray-100 hover:scale-[1.02] hover:shadow-2xl dark:hover:border-oled-border/60 group relative">
+                <div key={task.id} className="glass-panel p-7 rounded-[2rem] shadow-sm border transition-all duration-300 dark:border-oled-border border-gray-100 hover:scale-[1.02] hover:shadow-2xl dark:hover:border-oled-border/60 group relative overflow-hidden">
                   <div className="flex justify-between items-start mb-6">
                     <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest ${task.priority === 'HIGH' ? 'bg-rose-500/10 text-rose-500' : task.priority === 'MEDIUM' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                       {task.priority}
@@ -162,7 +184,7 @@ const Dashboard: React.FC = () => {
                       <div className="w-9 h-9 rounded-full bg-indigo-500/20 dark:bg-indigo-900/40 flex items-center justify-center text-[11px] text-[#4f46e5] dark:text-indigo-400 font-black">TM</div>
                       <span className="text-[12px] font-bold dark:text-gray-300 text-gray-600">{task.dueDate || 'ASAP'}</span>
                     </div>
-                    <select value={task.status} onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)} className="text-[10px] font-black dark:text-gray-500 text-gray-400 dark:bg-[#050505] bg-gray-50 border border-transparent dark:border-oled-border rounded-xl px-4 py-2 outline-none cursor-pointer uppercase tracking-widest">
+                    <select value={task.status} onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)} className="text-[10px] font-black dark:text-gray-500 text-gray-400 dark:bg-transparent bg-transparent border border-transparent dark:border-oled-border rounded-xl px-4 py-2 outline-none cursor-pointer uppercase tracking-widest">
                       {Object.values(TaskStatus).map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
@@ -174,8 +196,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6 transition-all">
-          <div className="dark:bg-oled-card bg-white rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 glass-modal z-[100] flex items-center justify-center p-6 transition-all">
+          <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
             <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
               <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">New Task</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-3 text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-white/5"><svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -183,22 +205,22 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleAddTask} className="p-12 space-y-10">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Objective Name</label>
-                <input required value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-bold text-lg" placeholder="Task Name" />
+                <input required value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg" placeholder="Task Name" />
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Protocol Details</label>
-                <textarea rows={3} value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-medium resize-none" placeholder="Requirements..." />
+                <textarea rows={3} value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none" placeholder="Requirements..." />
               </div>
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Priority Tier</label>
-                  <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-black uppercase tracking-widest text-[11px]">
+                  <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px]">
                     <option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option>
                   </select>
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
-                  <input type="date" required value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold" />
+                  <input type="date" required value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold" />
                 </div>
               </div>
               <button type="submit" className="w-full py-6 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow uppercase tracking-[0.2em] text-sm mt-8 transition-transform active:scale-95 shadow-2xl shadow-indigo-500/30">Launch Execution</button>

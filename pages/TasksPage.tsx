@@ -15,7 +15,7 @@ const TaskRow: React.FC<{
   onDelete: (id: string) => void;
 }> = ({ task, onStatusToggle, onDelete }) => {
   return (
-    <div className="group flex items-center justify-between p-6 dark:bg-oled-card bg-white border dark:border-oled-border border-gray-100 rounded-3xl transition-all hover:scale-[1.01] hover:shadow-2xl dark:hover:border-oled-border/60">
+    <div className="group flex items-center justify-between p-6 glass-panel rounded-3xl transition-all hover:scale-[1.01] hover:shadow-2xl dark:hover:border-oled-border/60">
       <div className="flex items-center gap-6 overflow-hidden">
         <button 
           onClick={() => onStatusToggle(task)}
@@ -131,9 +131,9 @@ const TasksPage: React.FC = () => {
 
       <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
         <div className="relative w-full max-w-md group">
-          <input type="text" placeholder="Filter IDs..." value={search} onChange={e => setSearch(e.target.value)} className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-card dark:border-oled-border dark:text-white bg-white border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" />
+          <input type="text" placeholder="Filter IDs..." value={search} onChange={e => setSearch(e.target.value)} className="w-full px-6 py-4 rounded-2xl border transition-all glass-panel dark:text-white bg-white/50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" />
         </div>
-        <div className="flex items-center gap-2 p-1 dark:bg-oled-card bg-gray-100 rounded-2xl border dark:border-oled-border border-gray-200">
+        <div className="flex items-center gap-2 p-1 glass-panel rounded-2xl border dark:border-oled-border border-gray-200">
           {(['ALL', ...Object.values(TaskStatus)] as const).map(s => (
             <button key={s} onClick={() => setFilter(s)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === s ? 'dark:bg-indigo-500 bg-indigo-500 text-white shadow-lg' : 'text-gray-500 hover:text-indigo-500'}`}>
               {s.replace('_', ' ')}
@@ -146,10 +146,10 @@ const TasksPage: React.FC = () => {
         {filteredTasks.length > 0 ? (
           filteredTasks.map(task => <TaskRow key={task.id} task={task} onStatusToggle={handleStatusToggle} onDelete={handleDelete} />)
         ) : (
-          <div className="h-[450px] flex flex-col items-center justify-center dark:bg-oled-card bg-white border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[4rem] text-center p-12 animate-fade-in">
+          <div className="h-[450px] flex flex-col items-center justify-center glass-panel border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[4rem] text-center p-12 animate-fade-in">
             <div className="relative mb-10">
               <div className="absolute inset-0 bg-indigo-500/20 blur-[80px] rounded-full scale-150 animate-pulse"></div>
-              <div className="relative w-24 h-24 dark:bg-oled-surface bg-gray-50 border dark:border-oled-border border-gray-200 rounded-[2rem] flex items-center justify-center shadow-inner">
+              <div className="relative w-24 h-24 glass-panel border dark:border-oled-border border-gray-200 rounded-[2rem] flex items-center justify-center shadow-inner">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -170,8 +170,8 @@ const TasksPage: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6 transition-all">
-          <div className="dark:bg-oled-card bg-white rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
+        <div className="fixed inset-0 bg-black/60 glass-modal z-[100] flex items-center justify-center p-6 transition-all">
+          <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
             <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
               <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">New Task</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-3 text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-white/5">
@@ -187,7 +187,7 @@ const TasksPage: React.FC = () => {
                   required 
                   value={newTask.title} 
                   onChange={e => setNewTask({...newTask, title: e.target.value})} 
-                  className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-bold text-lg focus:border-indigo-500 transition-colors" 
+                  className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg focus:border-indigo-500 transition-colors" 
                   placeholder="Task Name" 
                 />
               </div>
@@ -197,7 +197,7 @@ const TasksPage: React.FC = () => {
                   rows={3} 
                   value={newTask.description} 
                   onChange={e => setNewTask({...newTask, description: e.target.value})} 
-                  className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none font-medium resize-none focus:border-indigo-500 transition-colors" 
+                  className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none focus:border-indigo-500 transition-colors" 
                   placeholder="Requirements..." 
                 />
               </div>
@@ -207,7 +207,7 @@ const TasksPage: React.FC = () => {
                   <select 
                     value={newTask.priority} 
                     onChange={e => setNewTask({...newTask, priority: e.target.value})} 
-                    className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-black uppercase tracking-widest text-[11px] focus:border-indigo-500 transition-colors"
+                    className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px] focus:border-indigo-500 transition-colors"
                   >
                     <option value="LOW">Low Impact</option>
                     <option value="MEDIUM">Medium Priority</option>
@@ -221,7 +221,7 @@ const TasksPage: React.FC = () => {
                     required
                     value={newTask.dueDate} 
                     onChange={e => setNewTask({...newTask, dueDate: e.target.value})} 
-                    className="w-full px-6 py-5 rounded-2xl border dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 outline-none font-bold focus:border-indigo-500 transition-colors" 
+                    className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold focus:border-indigo-500 transition-colors" 
                   />
                 </div>
               </div>

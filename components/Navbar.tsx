@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="border-b transition-colors duration-300 dark:bg-black dark:border-oled-border bg-white border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-[60]">
+    <nav className="border-b transition-colors duration-300 dark:bg-black/50 bg-white/70 glass-panel dark:border-oled-border border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-[60]">
       <Link to="/" className="flex items-center gap-3 group">
         <div className="w-10 h-10 bg-[#4f46e5] rounded-[12px] flex items-center justify-center text-white font-black text-xl btn-glow shadow-sm group-hover:scale-105 transition-transform">D</div>
         <span className="text-2xl font-black transition-colors dark:text-white text-gray-900 tracking-tighter">DayOne</span>
@@ -66,7 +66,7 @@ const Navbar: React.FC = () => {
               )}
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 px-4 py-2 dark:bg-oled-surface bg-gray-50 rounded-full border dark:border-oled-border border-gray-100 min-w-[40px]">
+              <div className="flex items-center gap-3 px-4 py-2 dark:bg-white/5 bg-gray-50/50 glass-panel rounded-full border dark:border-oled-border border-gray-100 min-w-[40px]">
                 <div className="w-6 h-6 rounded-full bg-indigo-200 dark:bg-indigo-900/40 flex items-center justify-center text-[10px] text-[#4f46e5] dark:text-indigo-400 font-bold">
                   {getUserInitial()}
                 </div>
