@@ -8,7 +8,7 @@ import axios from 'axios';
  */
 const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
   const lines = text.split('\n');
-  
+
   return (
     <div className="space-y-4">
       {lines.map((line, idx) => {
@@ -33,7 +33,7 @@ const AIResponseRenderer: React.FC<{ text: string }> = ({ text }) => {
           const level = line.match(/^#+/)?.[0].length || 1;
           const content = line.replace(/^#+\s*/, '');
           const baseStyle = "font-black tracking-tighter dark:text-white text-gray-900 mt-10 mb-6 uppercase";
-          
+
           if (level === 1) return <h2 key={idx} className={`${baseStyle} text-3xl text-indigo-500`}>{renderBold(content)}</h2>;
           return <h3 key={idx} className={`${baseStyle} text-xl text-indigo-400 border-b dark:border-white/5 pb-2`}>{renderBold(content)}</h3>;
         }
@@ -106,7 +106,7 @@ const StudyAssistant: React.FC = () => {
   useEffect(() => {
     const savedResponse = localStorage.getItem('dayone_study_response');
     const savedParams = localStorage.getItem('dayone_study_params');
-    
+
     if (savedResponse) setResponse(savedResponse);
     if (savedParams) {
       const params = JSON.parse(savedParams);
@@ -161,9 +161,14 @@ const StudyAssistant: React.FC = () => {
       const text = response.data.text || 'Protocol generation failed. Retry.';
       setResponse(text);
       saveToPersistence(text);
-    } catch (err) {
-      console.error("AI Strategic Failure:", err);
-      setResponse("AI TERMINAL OFFLINE. Check credentials and retry.");
+    } catch (err: any) {
+      console.error("AI Request Failed - Full Error:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        error: err
+      });
+      setResponse(`AI TERMINAL OFFLINE.\n\nDEBUG: ${err.response?.data?.error || err.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -190,7 +195,7 @@ const StudyAssistant: React.FC = () => {
           <form onSubmit={generateStrategy} className="glass-panel p-10 rounded-[3rem] border dark:border-oled-border border-gray-100 shadow-sm space-y-8">
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">The Friction</label>
-              <textarea 
+              <textarea
                 required
                 value={struggle}
                 onChange={e => setStruggle(e.target.value)}
@@ -201,7 +206,7 @@ const StudyAssistant: React.FC = () => {
 
             <div className="space-y-3">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Subject Dynamics</label>
-              <select 
+              <select
                 value={subjectType}
                 onChange={e => setSubjectType(e.target.value)}
                 className="w-full px-6 py-4 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold uppercase tracking-widest text-[11px] focus:border-indigo-500 transition-colors"
@@ -216,8 +221,8 @@ const StudyAssistant: React.FC = () => {
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Daily Cap (Hrs)</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   min="0.5"
                   step="0.5"
                   required
@@ -228,8 +233,8 @@ const StudyAssistant: React.FC = () => {
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   required
                   value={examDate}
                   onChange={e => setExamDate(e.target.value)}
@@ -238,8 +243,8 @@ const StudyAssistant: React.FC = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="w-full py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-xs mt-4 disabled:opacity-50 transition-transform active:scale-95"
             >
@@ -272,7 +277,7 @@ const StudyAssistant: React.FC = () => {
               <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none group-hover:opacity-[0.06] transition-opacity">
                 <span className="text-[12rem] font-black">AI</span>
               </div>
-              
+
               <div className="relative z-10 h-full flex flex-col">
                 <div className="flex items-center gap-4 mb-10 shrink-0">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
@@ -289,8 +294,8 @@ const StudyAssistant: React.FC = () => {
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                   <AIResponseRenderer text={response} />
                 </div>
-                
-                <button 
+
+                <button
                   onClick={handleReset}
                   className="mt-10 w-fit px-10 py-4 glass-panel border dark:border-oled-border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-white hover:bg-indigo-500 hover:border-indigo-500 transition-all active:scale-[0.98]"
                 >

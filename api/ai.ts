@@ -29,27 +29,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const apiKey = (process.env as any).GEMINI_API_KEY;
+    console.log('[AI API] GEMINI_API_KEY status:', apiKey ? `present (${apiKey.length} chars)` : 'MISSING');
+    console.log('[AI API] API Key first 10 chars:', apiKey ? apiKey.substring(0, 10) : 'N/A');
+
     if (!apiKey) {
         res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
         return;
     }
 
     try {
+        console.log('[AI API] Initializing GoogleGenAI with API key');
         const ai = new GoogleGenAI({ apiKey });
+        console.log('[AI API] Calling generateContent with model: gemini-2.0-flash');
         const response = await ai.models.generateContent({
             model: 'gemini-2.0-flash',
             contents: prompt,
         });
 
+        console.log('[AI API] Success, response text length:', response.text?.length || 0);
         res.status(200).json({
             text: response.text,
             model: 'gemini-2.0-flash'
         });
     } catch (error: any) {
-        console.error('Gemini API Error:', error);
+        console.error('[AI API] FULL ERROR:', JSON.stringify({
+            message: error.message,
+            name: error.name,
+            code: error.code,
+            status: error.status,
+            stack: error.stack,
+            toString: error.toString()
+        }, null, 2));
         res.status(500).json({
             error: error.message || 'Failed to generate content',
-            details: error.error?.message || error.toString()
+            errorType: error.name,
+            errorCode: error.code
         });
     }
 }
