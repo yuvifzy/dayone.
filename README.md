@@ -148,3 +148,10 @@ This is an active project. If you want to contribute:
 📄 License
 
 MIT License
+
+
+Made By:
+Yuvraj Mohana
+Syed Aman Zabi
+Talha Riyan Pasha
+
