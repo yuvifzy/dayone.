@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthState, User, UserRole } from './types';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
@@ -162,6 +163,7 @@ const App: React.FC = () => {
                 />
               </Routes>
             </main>
+            <Analytics />
           </div>
         </HashRouter>
       </AuthContext.Provider>
