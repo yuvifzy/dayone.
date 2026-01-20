@@ -1,0 +1,7 @@
+{
+  "name": "DayOne",
+  "description": "A mission-critical project intelligence suite featuring high-performance Spring Boot and a React dark-mode optimized frontend.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

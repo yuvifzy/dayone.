@@ -1,0 +1,21 @@
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/zentask
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  jwt:
+    secret: 9a4f4e85e8706a92659e4d60c6d67e6f853876e1903e1e905d8f6f4d6d6a6d6e
+    expiration: 86400000 # 24 hours
