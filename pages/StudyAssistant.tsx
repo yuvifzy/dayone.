@@ -157,8 +157,44 @@ const StudyAssistant: React.FC = () => {
 
         You are an elite study strategist for high-performance engineering students. You despise generic advice. You provide precise, science-backed technical study protocols.`;
 
-      const response = await axios.post('/api/ai', { prompt });
-      const text = response.data.text || 'Protocol generation failed. Retry.';
+      // Detect local development environment
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+      let text: string;
+
+      if (isLocalDev) {
+        // Mock response for local development (API not available locally)
+        text = `## STRATEGIC SUMMARY
+
+**Classification:** ${struggle.includes('time') ? 'Time Management' : struggle.includes('motiv') ? 'Motivation' : struggle.includes('focus') ? 'Focus' : struggle.includes('memory') ? 'Memory' : 'Planning'}
+
+The core friction you're experiencing stems from insufficient **structural decomposition** of your study sessions. Your current approach lacks specificity in task definition and temporal boundaries.
+
+## TECHNICAL DRILL
+
+**Recommended Technique:** Interleaved Practice with Active Recall Blocks
+
+**How:** Structure your ${timeAvailable}-hour study capacity into 50-min blocks: 40min focused learning + 10min retrieval practice. Alternate between topics within 3-block cycles.
+
+**Why:** Interleaving forces your brain to discriminate between concepts at retrieval time, deepening encoding. Active recall during spacing maximizes memory consolidation compared to passive review.
+
+## THE DAILY ROUTINE
+
+**Day Structure (${timeAvailable} hours):**
+- 8:00–8:40: Core concept immersion (${subjectType})
+- 8:40–8:50: Active recall drill
+- 8:50–9:05: 15min break
+- 9:05–9:45: Concept application (problems/examples)
+- 9:45–9:55: Retrieval practice
+- 10:00–11:00: Deep drill on weakest topic
+
+**Expected Outcome by ${examDate}:** 60% retention → 85%+ with consistent execution.`;
+      } else {
+        // Production: call real API
+        const response = await axios.post('/api/ai', { prompt });
+        text = response.data.text || 'Protocol generation failed. Retry.';
+      }
+
       setResponse(text);
       saveToPersistence(text);
     } catch (err: any) {
