@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import axios from 'axios';
 
 /**
  * AIResponseRenderer
@@ -140,9 +140,7 @@ const StudyAssistant: React.FC = () => {
     setResponse(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      const prompt = `
-        STRATEGIC CONTEXT:
+      const prompt = `STRATEGIC CONTEXT:
         - Struggle: ${struggle}
         - Exam Date: ${examDate}
         - Subject Focus: ${subjectType}
@@ -156,19 +154,11 @@ const StudyAssistant: React.FC = () => {
            - THE DAILY ROUTINE: A timestamped plan based on their ${timeAvailable} hour capacity.
 
         STYLE: Professional, technical, zero-fluff, actionable. Use standard bullet points for lists.
-      `;
 
-      const result = await ai.models.generateContent({
-        model: 'gemini-flash-lite-latest',
-        contents: prompt,
-        config: {
-          systemInstruction: 'You are an elite study strategist for high-performance engineering students. You despise generic advice. You provide precise, science-backed technical study protocols.',
-          temperature: 0.4,
-          topP: 0.8,
-        },
-      });
+        You are an elite study strategist for high-performance engineering students. You despise generic advice. You provide precise, science-backed technical study protocols.`;
 
-      const text = result.text || 'Protocol generation failed. Retry.';
+      const response = await axios.post('/api/ai', { prompt });
+      const text = response.data.text || 'Protocol generation failed. Retry.';
       setResponse(text);
       saveToPersistence(text);
     } catch (err) {
