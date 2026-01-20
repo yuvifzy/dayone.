@@ -1,7 +1,9 @@
 {
-    "functions": {
-        "api/*.ts": {
-            "runtime": "nodejs18.x"
-        }
+  "functions": {
+    "api/*.ts": {
+      "runtime": "nodejs18.x"
     }
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }
