@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '../types';
-import axios from 'axios';
+import { GoogleGenAI } from "@google/genai";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../services/api';
 import { useAuth } from '../App';
@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
-
+    
     try {
       const updatedTask = { ...task, status: newStatus };
       await api.put(`/tasks/${taskId}`, updatedTask);
@@ -76,12 +76,14 @@ const Dashboard: React.FC = () => {
   const generateTaskBreakdown = async (taskTitle: string) => {
     setIsAiSuggesting(true);
     try {
-      const response = await axios.post('/api/ai', {
-        prompt: `Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"`
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"`,
       });
-      alert(`DayOne Strategic breakdown:\n\n${response.data.text}`);
-    } catch (err: any) {
-      console.error("AI Request Error:", err.message);
+      alert(`DayOne Strategic breakdown:\n\n${response.text}`);
+    } catch (err) {
+      console.error("Gemini Error:", err);
       alert("AI Intelligence currently offline.");
     } finally {
       setIsAiSuggesting(false);
@@ -104,7 +106,7 @@ const Dashboard: React.FC = () => {
             Welcome back, <span className="text-indigo-500 dark:text-indigo-400 font-bold">{getUserFirstName()}</span>. Terminal ready for operation.
           </p>
         </div>
-        <button
+        <button 
           onClick={() => setIsModalOpen(true)}
           className="px-8 py-4 bg-[#4f46e5] text-white font-black rounded-2xl btn-glow shadow-xl shadow-indigo-500/10 flex items-center gap-3 uppercase tracking-widest text-xs"
         >
@@ -124,7 +126,7 @@ const Dashboard: React.FC = () => {
             <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Active</span>
           </div>
         </div>
-
+        
         {/* Efficiency Metric */}
         <div className="glass-panel p-8 rounded-[2rem] border transition-colors dark:border-oled-border border-gray-100 shadow-sm flex flex-col justify-center min-h-[180px]">
           <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">Efficiency</p>
@@ -163,7 +165,7 @@ const Dashboard: React.FC = () => {
                 {tasks.filter(t => t.status === status).length}
               </span>
             </div>
-
+            
             <div className="space-y-6 kanban-column max-h-[70vh] overflow-y-auto pr-2">
               {tasks.filter(t => t.status === status).map(task => (
                 <div key={task.id} className="glass-panel p-7 rounded-[2rem] shadow-sm border transition-all duration-300 dark:border-oled-border border-gray-100 hover:scale-[1.02] hover:shadow-2xl dark:hover:border-oled-border/60 group relative overflow-hidden">
@@ -203,22 +205,22 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleAddTask} className="p-12 space-y-10">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Objective Name</label>
-                <input required value={newTask.title} onChange={e => setNewTask({ ...newTask, title: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg" placeholder="Task Name" />
+                <input required value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg" placeholder="Task Name" />
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Protocol Details</label>
-                <textarea rows={3} value={newTask.description} onChange={e => setNewTask({ ...newTask, description: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none" placeholder="Requirements..." />
+                <textarea rows={3} value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none" placeholder="Requirements..." />
               </div>
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Priority Tier</label>
-                  <select value={newTask.priority} onChange={e => setNewTask({ ...newTask, priority: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px]">
+                  <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px]">
                     <option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option>
                   </select>
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
-                  <input type="date" required value={newTask.dueDate} onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold" />
+                  <input type="date" required value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold" />
                 </div>
               </div>
               <button type="submit" className="w-full py-6 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow uppercase tracking-[0.2em] text-sm mt-8 transition-transform active:scale-95 shadow-2xl shadow-indigo-500/30">Launch Execution</button>

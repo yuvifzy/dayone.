@@ -4,9 +4,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/dayone
-    username: yuvrajmohana
-    password: postgres123
+    url: jdbc:postgresql://localhost:5432/zentask
+    username: postgres
+    password: password
   jpa:
     hibernate:
       ddl-auto: update
