@@ -31,19 +31,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const apiKey = (process.env as any).GEMINI_API_KEY;
     console.log('[AI API] GEMINI_API_KEY status:', apiKey ? `present (${apiKey.length} chars)` : 'MISSING');
     console.log('[AI API] API Key first 10 chars:', apiKey ? apiKey.substring(0, 10) : 'N/A');
+    
+    if (!apiKey || apiKey.trim() === '') {
+        console.error('[AI API] API Key validation failed: empty or missing');
+        res.status(500).json({ error: 'GEMINI_API_KEY not configured or empty' });
+        return;
+    }
 
-    if (!apiKey) {
-        res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+    if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
+        console.error('[AI API] Prompt validation failed: empty or invalid type');
+        res.status(400).json({ error: 'Prompt must be a non-empty string' });
         return;
     }
 
     try {
         console.log('[AI API] Initializing GoogleGenAI with API key');
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
         console.log('[AI API] Calling generateContent with model: gemini-2.0-flash');
+        
         const response = await ai.models.generateContent({
             model: 'gemini-2.0-flash',
-            contents: prompt,
+            contents: [
+                {
+                    role: 'user',
+                    parts: [{ text: prompt }]
+                }
+            ]
         });
 
         console.log('[AI API] Success, response text length:', response.text?.length || 0);
@@ -57,7 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name: error.name,
             code: error.code,
             status: error.status,
-            stack: error.stack,
+            stack: error.stack?.substring(0, 500),
             toString: error.toString()
         }, null, 2));
         res.status(500).json({
