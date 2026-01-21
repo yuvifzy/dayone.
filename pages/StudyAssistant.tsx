@@ -95,8 +95,17 @@ const getTomorrowDate = () => {
 };
 
 const StudyAssistant: React.FC = () => {
+  // Helper to safely get tomorrow's date inside component
+  const getDefaultDate = () => {
+    try {
+      return getTomorrowDate();
+    } catch {
+      return '2026-01-22';
+    }
+  };
+
   const [struggle, setStruggle] = useState('');
-  const [examDate, setExamDate] = useState(getTomorrowDate());
+  const [examDate, setExamDate] = useState(getDefaultDate());
   const [subjectType, setSubjectType] = useState('theory');
   const [timeAvailable, setTimeAvailable] = useState('2');
   const [loading, setLoading] = useState(false);
@@ -134,7 +143,31 @@ const StudyAssistant: React.FC = () => {
 
   const generateStrategy = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!struggle.trim()) return;
+
+    // Strict parameter guards - prevent crashes from undefined params
+    if (!struggle?.trim()) {
+      setResponse('Please describe your academic struggle.');
+      setLoading(false);
+      return;
+    }
+
+    if (!examDate) {
+      setResponse('Exam date is required.');
+      setLoading(false);
+      return;
+    }
+
+    if (!subjectType) {
+      setResponse('Subject type is required.');
+      setLoading(false);
+      return;
+    }
+
+    if (!timeAvailable) {
+      setResponse('Daily hours available is required.');
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setResponse(null);

@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const apiKey = (process.env as any).GEMINI_API_KEY;
     console.log('[AI API] GEMINI_API_KEY status:', apiKey ? `present (${apiKey.length} chars)` : 'MISSING');
     console.log('[AI API] API Key first 10 chars:', apiKey ? apiKey.substring(0, 10) : 'N/A');
-    
+
     if (!apiKey || apiKey.trim() === '') {
         console.error('[AI API] API Key validation failed: empty or missing');
         res.status(500).json({ error: 'GEMINI_API_KEY not configured or empty' });
@@ -45,10 +45,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        console.log('[AI API] Initializing GoogleGenAI with API key');
-        const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
-        console.log('[AI API] Calling generateContent with model: gemini-2.0-flash');
+        // Validate API key is set and not empty
+        if (!apiKey || apiKey.trim() === '') {
+            console.error('[AI API] API Key is empty or undefined');
+            return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+        }
+
+        const trimmedKey = apiKey.trim();
+        console.log('[AI API] Initializing GoogleGenAI with API key length:', trimmedKey.length);
         
+        // Initialize SDK with explicit params object
+        const ai = new GoogleGenAI({
+            apiKey: trimmedKey,
+            baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+        });
+        
+        console.log('[AI API] GoogleGenAI initialized');
+        console.log('[AI API] Calling generateContent');
+
         const response = await ai.models.generateContent({
             model: 'gemini-2.0-flash',
             contents: [
@@ -60,23 +74,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
 
         console.log('[AI API] Success, response text length:', response.text?.length || 0);
-        res.status(200).json({
+        return res.status(200).json({
             text: response.text,
             model: 'gemini-2.0-flash'
         });
     } catch (error: any) {
-        console.error('[AI API] FULL ERROR:', JSON.stringify({
+        console.error('[AI API] FULL ERROR:', {
             message: error.message,
             name: error.name,
             code: error.code,
-            status: error.status,
-            stack: error.stack?.substring(0, 500),
-            toString: error.toString()
-        }, null, 2));
-        res.status(500).json({
+            status: error.status
+        });
+        return res.status(500).json({
             error: error.message || 'Failed to generate content',
-            errorType: error.name,
-            errorCode: error.code
+            errorType: error.name
         });
     }
 }

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '../types';
-import { GoogleGenAI } from "@google/genai";
+import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../services/api';
 import { useAuth } from '../App';
@@ -76,14 +76,12 @@ const Dashboard: React.FC = () => {
   const generateTaskBreakdown = async (taskTitle: string) => {
     setIsAiSuggesting(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"`,
+      const response = await axios.post('/api/ai', {
+        prompt: `Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"`
       });
-      alert(`DayOne Strategic breakdown:\n\n${response.text}`);
-    } catch (err) {
-      console.error("Gemini Error:", err);
+      alert(`DayOne Strategic breakdown:\n\n${response.data.text}`);
+    } catch (err: any) {
+      console.error("AI Request Error:", err.message);
       alert("AI Intelligence currently offline.");
     } finally {
       setIsAiSuggesting(false);
