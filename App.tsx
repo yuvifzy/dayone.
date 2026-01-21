@@ -15,7 +15,7 @@ interface ThemeContextType {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
-
+//DarkMode
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const useTheme = () => {
   const context = useContext(ThemeContext);
@@ -38,7 +38,7 @@ export const useAuth = () => {
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode, adminOnly?: boolean }> = ({ children, adminOnly = false }) => {
   const { auth } = useAuth();
-  
+
   if (auth.loading) {
     return (
       <div className="flex h-screen items-center justify-center dark:bg-black bg-white">
@@ -49,10 +49,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode, adminOnly?: boolean 
       </div>
     );
   }
-  
+
   if (!auth.isAuthenticated) return <Navigate to="/login" replace />;
   if (adminOnly && auth.user?.role !== UserRole.ADMIN) return <Navigate to="/dashboard" replace />;
-  
+
   return <>{children}</>;
 };
 
@@ -128,37 +128,37 @@ const App: React.FC = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<AuthPage mode="login" />} />
                 <Route path="/register" element={<AuthPage mode="register" />} />
-                <Route 
-                  path="/dashboard" 
+                <Route
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/tasks" 
+                <Route
+                  path="/tasks"
                   element={
                     <ProtectedRoute>
                       <TasksPage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/study" 
+                <Route
+                  path="/study"
                   element={
                     <ProtectedRoute>
                       <StudyAssistant />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/admin" 
+                <Route
+                  path="/admin"
                   element={
                     <ProtectedRoute adminOnly>
                       <AdminDashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
               </Routes>
             </main>
