@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        middlewareMode: false,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
+        }
       },
       plugins: [react()],
       define: {
@@ -17,6 +21,15 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
+        }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            entryFileNames: `[name].[hash].js`,
+            chunkFileNames: `[name].[hash].js`,
+            assetFileNames: `[name].[hash].[ext]`
+          }
         }
       }
     };
