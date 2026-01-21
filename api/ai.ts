@@ -53,13 +53,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const trimmedKey = apiKey.trim();
         console.log('[AI API] Initializing GoogleGenAI with API key length:', trimmedKey.length);
-        
+
         // Initialize SDK with explicit params object
         const ai = new GoogleGenAI({
             apiKey: trimmedKey,
             baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/'
         });
-        
+
         console.log('[AI API] GoogleGenAI initialized');
         console.log('[AI API] Calling generateContent');
 
