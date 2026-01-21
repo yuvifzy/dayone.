@@ -151,7 +151,8 @@ MIT License
 
 
 Made By:
-Yuvraj Mohana
-Syed Aman Zabi
-Talha Riyan Pasha
+Yuvraj Mohana [Front End]
+Syed Aman Zabi [Back-end]
+Talha Riyan Pasha [Databases & Auth]
+
 
