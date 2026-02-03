@@ -189,7 +189,7 @@ const TasksPage: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center p-6 transition-all">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-xl z-[100] flex items-center justify-center p-6 transition-all">
           <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
             <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
               <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">New Task</h2>
@@ -257,7 +257,7 @@ const TasksPage: React.FC = () => {
 
       {/* EDIT TASK MODAL */}
       {editingTask && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center p-6 transition-all">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-xl z-[100] flex items-center justify-center p-6 transition-all">
           <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
             <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
               <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">Edit Task</h2>
