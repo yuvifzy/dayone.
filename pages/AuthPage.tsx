@@ -81,7 +81,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
         if (extracted) displayMessage = safeString(extracted);
       }
       else if (err.code === 'ERR_NETWORK') {
-        displayMessage = 'TERMINAL OFFLINE: Local DayOne Node (localhost:8080) unreachable.';
+        displayMessage = 'TERMINAL OFFLINE: Backbone Node (Backend) unreachable.';
       }
       else if (err.message) {
         displayMessage = safeString(err.message);
