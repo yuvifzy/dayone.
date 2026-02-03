@@ -63,7 +63,6 @@ const Dashboard: React.FC = () => {
     } catch (err) {
       console.error("Failed to update task status", err);
       // Revert on failure
-      // Revert on failure
       setTasks(prev => prev.map(t => String(t.id) === String(taskId) ? { ...t, status: task.status } : t));
       alert("Operation failed. Syncing error.");
     }
@@ -221,7 +220,7 @@ const Dashboard: React.FC = () => {
                       className="space-y-6 kanban-column max-h-[70vh] min-h-[400px] overflow-y-auto pr-2"
                     >
                       {tasks.filter(t => t.status === status).map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                        <Draggable key={task.id} draggableId={String(task.id)} index={index}>
                           {(provided) => (
                             <div
                               ref={provided.innerRef}
