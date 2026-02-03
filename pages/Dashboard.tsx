@@ -217,7 +217,7 @@ const Dashboard: React.FC = () => {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-6 kanban-column max-h-[70vh] overflow-y-auto pr-2"
+                      className="space-y-6 kanban-column max-h-[70vh] min-h-[400px] overflow-y-auto pr-2"
                     >
                       {tasks.filter(t => t.status === status).map((task, index) => (
                         <Draggable key={task.id} draggableId={task.id} index={index}>
