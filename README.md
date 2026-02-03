@@ -85,3 +85,6 @@ npm run dev
 ---
 
 *Built with ❤️ by the DayOne Team*
+: Syed Aman Zabi
+, Talha Riyan Pasha
+, Yuvraj Mohana 
