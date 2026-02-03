@@ -4,9 +4,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/dayone
-    username: yuvrajmohana
-    password:
+    url: jdbc:postgresql://ep-crimson-morning-a1pvbb9f-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_P6J5CpoUemuD
   jpa:
     hibernate:
       ddl-auto: update
