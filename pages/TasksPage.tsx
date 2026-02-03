@@ -134,58 +134,60 @@ const TasksPage: React.FC = () => {
   if (loading) return <div className="p-8 text-gray-500 animate-pulse">Syncing Inventory...</div>;
 
   return (
-    <div className="p-8 max-w-[1200px] mx-auto space-y-12 animate-fade-in">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
-        <div>
-          <h1 className="text-5xl font-black dark:text-white text-gray-900 tracking-tighter">Tasks Inventory</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-base mt-2 font-medium tracking-tight">Active mission-critical task tracking</p>
-        </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-8 py-4 bg-[#4f46e5] text-white font-black rounded-2xl btn-glow shadow-xl shadow-indigo-500/10 flex items-center gap-3 uppercase tracking-widest text-xs"
-        >
-          <span className="text-xl">+</span> Add Task
-        </button>
-      </header>
-
-      <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-        <div className="relative w-full max-w-md group">
-          <input type="text" placeholder="Filter IDs..." value={search} onChange={e => setSearch(e.target.value)} className="w-full px-6 py-4 rounded-2xl border transition-all glass-panel dark:text-white bg-white/50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" />
-        </div>
-        <div className="flex items-center gap-2 p-1 glass-panel rounded-2xl border dark:border-oled-border border-gray-200">
-          {(['ALL', ...Object.values(TaskStatus)] as const).map(s => (
-            <button key={s} onClick={() => setFilter(s)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === s ? 'dark:bg-indigo-500 bg-indigo-500 text-white shadow-lg' : 'text-gray-500 hover:text-indigo-500'}`}>
-              {s.replace('_', ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {filteredTasks.length > 0 ? (
-          filteredTasks.map(task => <TaskRow key={task.id} task={task} onStatusToggle={handleStatusToggle} onEdit={(t) => setEditingTask(t)} onDelete={handleDelete} />)
-        ) : (
-          <div className="h-[450px] flex flex-col items-center justify-center glass-panel border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[4rem] text-center p-12 animate-fade-in">
-            <div className="relative mb-10">
-              <div className="absolute inset-0 bg-indigo-500/20 blur-[80px] rounded-full scale-150 animate-pulse"></div>
-              <div className="relative w-24 h-24 glass-panel border dark:border-oled-border border-gray-200 rounded-[2rem] flex items-center justify-center shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-3xl font-black dark:text-white text-gray-900 tracking-tighter mb-4">Strategic Clearance.</h3>
-            <p className="max-w-md text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-10">
-              No mission-critical tasks detected in this sector. This is your chance to initialize a new execution protocol.
-            </p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-10 py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-[11px] transition-transform active:scale-95"
-            >
-              Launch First Execution
-            </button>
+    <>
+      <div className="p-8 max-w-[1200px] mx-auto space-y-12 animate-fade-in">
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
+          <div>
+            <h1 className="text-5xl font-black dark:text-white text-gray-900 tracking-tighter">Tasks Inventory</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-base mt-2 font-medium tracking-tight">Active mission-critical task tracking</p>
           </div>
-        )}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-8 py-4 bg-[#4f46e5] text-white font-black rounded-2xl btn-glow shadow-xl shadow-indigo-500/10 flex items-center gap-3 uppercase tracking-widest text-xs"
+          >
+            <span className="text-xl">+</span> Add Task
+          </button>
+        </header>
+
+        <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+          <div className="relative w-full max-w-md group">
+            <input type="text" placeholder="Filter IDs..." value={search} onChange={e => setSearch(e.target.value)} className="w-full px-6 py-4 rounded-2xl border transition-all glass-panel dark:text-white bg-white/50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" />
+          </div>
+          <div className="flex items-center gap-2 p-1 glass-panel rounded-2xl border dark:border-oled-border border-gray-200">
+            {(['ALL', ...Object.values(TaskStatus)] as const).map(s => (
+              <button key={s} onClick={() => setFilter(s)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === s ? 'dark:bg-indigo-500 bg-indigo-500 text-white shadow-lg' : 'text-gray-500 hover:text-indigo-500'}`}>
+                {s.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {filteredTasks.length > 0 ? (
+            filteredTasks.map(task => <TaskRow key={task.id} task={task} onStatusToggle={handleStatusToggle} onEdit={(t) => setEditingTask(t)} onDelete={handleDelete} />)
+          ) : (
+            <div className="h-[450px] flex flex-col items-center justify-center glass-panel border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[4rem] text-center p-12 animate-fade-in">
+              <div className="relative mb-10">
+                <div className="absolute inset-0 bg-indigo-500/20 blur-[80px] rounded-full scale-150 animate-pulse"></div>
+                <div className="relative w-24 h-24 glass-panel border dark:border-oled-border border-gray-200 rounded-[2rem] flex items-center justify-center shadow-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-3xl font-black dark:text-white text-gray-900 tracking-tighter mb-4">Strategic Clearance.</h3>
+              <p className="max-w-md text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-10">
+                No mission-critical tasks detected in this sector. This is your chance to initialize a new execution protocol.
+              </p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-10 py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-[11px] transition-transform active:scale-95"
+              >
+                Launch First Execution
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isModalOpen && (
@@ -295,7 +297,7 @@ const TasksPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
