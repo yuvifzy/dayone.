@@ -21,8 +21,8 @@ const TaskRow: React.FC<{
         <button
           onClick={() => onStatusToggle(task)}
           className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all btn-glow ${task.status === TaskStatus.DONE
-              ? 'bg-emerald-500 border-emerald-500 text-white'
-              : 'dark:border-oled-border border-gray-200 dark:hover:border-indigo-500 hover:border-indigo-500'
+            ? 'bg-emerald-500 border-emerald-500 text-white'
+            : 'dark:border-oled-border border-gray-200 dark:hover:border-indigo-500 hover:border-indigo-500'
             }`}
         >
           {task.status === TaskStatus.DONE && (
@@ -189,7 +189,7 @@ const TasksPage: React.FC = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 glass-modal z-[100] flex items-center justify-center p-6 transition-all">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center p-6 transition-all">
           <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
             <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
               <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">New Task</h2>
@@ -257,7 +257,7 @@ const TasksPage: React.FC = () => {
 
       {/* EDIT TASK MODAL */}
       {editingTask && (
-        <div className="fixed inset-0 bg-black/60 glass-modal z-[100] flex items-center justify-center p-6 transition-all">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center p-6 transition-all">
           <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
             <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
               <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">Edit Task</h2>
