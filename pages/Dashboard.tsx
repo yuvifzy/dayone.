@@ -23,6 +23,8 @@ const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAiSuggesting, setIsAiSuggesting] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'MEDIUM', status: TaskStatus.TODO, dueDate: getTomorrowDate() });
+  const [aiModal, setAiModal] = useState<{ open: boolean, content: string | null }>({ open: false, content: null });
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     fetchTasks();
@@ -73,20 +75,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-
-
-  const getUserFirstName = () => {
-    if (!auth.user?.name) return 'Operator';
-    return auth.user.name.split(' ')[0];
-  };
-
-  if (loading) return <div className="p-8 text-gray-500 animate-pulse">Initializing Data stream...</div>;
-
-  const [aiModal, setAiModal] = useState<{ open: boolean, content: string | null }>({ open: false, content: null });
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-
-  // ... existing hooks
-
   const handleUpdateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTask) return;
@@ -124,6 +112,13 @@ const Dashboard: React.FC = () => {
       setIsAiSuggesting(false);
     }
   };
+
+  const getUserFirstName = () => {
+    if (!auth.user?.name) return 'Operator';
+    return auth.user.name.split(' ')[0];
+  };
+
+  if (loading) return <div className="p-8 text-gray-500 animate-pulse">Initializing Data stream...</div>;
 
   // ... (getUserFirstName and other render logic)
 
