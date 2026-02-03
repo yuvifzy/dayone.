@@ -1,40 +1,87 @@
+# 🚀 DayOne Workspace
+### *Next-Gen AI-Powered Task Management System*
 
-# ZenTask: Enterprise-Grade Full-Stack App
+DayOne is an enterprise-grade workspace designed to streamline productivity for technical professionals. It combines robust task management with AI intelligence, providing a seamless experience for organizing, executing, and tracking mission-critical objectives.
 
-## Architecture
-- **Backend**: Spring Boot 3.2, Java 17, Spring Security (JWT), Spring Data JPA.
-- **Frontend**: React 18, Vite, Tailwind CSS, Axios, Lucide Icons, Gemini AI Integration.
-- **Database**: PostgreSQL.
+---
 
-## How to Run Local
+## ✨ Key Features
+
+### 🧠 **AI-Powered Intelligence**
+- **Smart Breakdown**: Leverage **Google Gemini AI** to automatically break down complex task titles into actionable, technical steps.
+- **Strategic Assistant**: Get instant AI guidance on how to approach your work.
+
+### 📊 **Interactive Kanban Board**
+- **Drag & Drop Workflow**: Effortlessly move tasks between *Todo*, *In Progress*, and *Done* columns.
+- **Optimistic UI**: Instant visual feedback ensuring a buttery-smooth user experience.
+- **Glassmorphism Design**: specific visual style customized for modern aesthetics.
+
+### 📈 **Real-Time Analytics**
+- **Visual Metrics**: Interactive charts powered by `recharts` to track priority distribution.
+- **Efficiency Tracking**: monitor your completion rates and daily activity at a glance.
+
+### 🛡️ **Enterprise Security**
+- **JWT Authentication**: Secure, stateless session management.
+- **Role-Based Access**: Granular control over user permissions.
+- **Encrypted Data**: Industry-standard BCrypt password hashing.
+
+---
+
+## 🛠️ Technology Stack
+
+| **Area** | **Technology** |
+| :--- | :--- |
+| **Frontend** | React 18, TypeScript, Vite, TailwindCSS, Framer Motion |
+| **Backend** | Java 17, Spring Boot 3.2, Spring Security |
+| **Database** | PostgreSQL |
+| **AI Engine** | Google Gemini Generative AI |
+| **State** | React Context API + LocalStorage |
+
+---
+
+## ⚡ Quick Start Guide
+
+### Prerequisites
+- **Node.js** v18+
+- **JDK** 17+
+- **PostgreSQL** running locally
 
 ### 1. Database Setup
-Ensure PostgreSQL is running on `localhost:5432`.
-Create a database named `zentask`:
+Create the dedicated database:
 ```sql
-CREATE DATABASE zentask;
+CREATE DATABASE dayone;
 ```
 
-### 2. Backend Setup
-1. Open the `/backend` folder.
-2. Ensure you have Maven and JDK 17 installed.
-3. Update `src/main/resources/application.yml` with your PostgreSQL credentials.
-4. Run: `mvn spring-boot:run`
-5. The API will be available at `http://localhost:8080`.
+### 2. Backend Server
+Navigate to the `/backend` directory and configure your DB credentials in `src/main/resources/application.yml`.
+```bash
+cd backend
+mvn spring-boot:run
+```
+*Server starts at `http://localhost:8080`*
 
-### 3. Frontend Setup
-1. In the project root, ensure you have Node.js 18+.
-2. Install dependencies: `npm install`
-3. Run: `npm run dev`
-4. Access the app at `http://localhost:5173`.
+### 3. Client Application
+In the project root:
+```bash
+# Install dependencies
+npm install
 
-## Security Implementation
-- **JWT**: Stateless authentication where the server signs a token containing the user's claims.
-- **BCrypt**: Passwords are never stored in plain text.
-- **Auth Guard**: React routes are protected using a context-based provider.
-- **CORS**: Backend is configured to specifically allow requests from the Vite port.
+# Launch the dashboard
+npm run dev
+```
+*Access the app at `http://localhost:5173`*
 
-## Common Issues & Fixes
-- **401 Unauthorized**: Check if the token is present in LocalStorage.
-- **CORS Errors**: Ensure the backend's allowed origins list `http://localhost:5173`.
-- **DB Connection Fail**: Verify your PostgreSQL service is active and credentials match `application.yml`.
+---
+
+## 🔧 Troubleshooting
+
+| Issue | Solution |
+| :--- | :--- |
+| **401 Unauthorized** | Session expired. Log out and log back in to refresh your JWT token. |
+| **Kanban Snap-back** | Ensure `React.StrictMode` is disabled in dev mode for DnD compatibility. |
+| **AI Not Responding** | Verify your Google Gemini API key is correctly set in the environment variables. |
+| **Database Connection** | Check if PostgreSQL service is active on port `5432`. |
+
+---
+
+*Built with ❤️ by the DayOne Team*
