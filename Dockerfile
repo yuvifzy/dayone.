@@ -2,12 +2,14 @@
 # Use an official OpenJDK image as the base image
 FROM eclipse-temurin:21-jdk-alpine as build
 WORKDIR /app
+# Install Maven manually since mvnw is missing
+RUN apk add --no-cache maven
+
 COPY backend/pom.xml .
 COPY backend/src ./src
-COPY backend/.mvn ./.mvn
-COPY backend/mvnw .
-RUN chmod +x mvnw
-RUN ./mvnw clean package -DskipTests
+
+# Build using the installed maven
+RUN mvn clean package -DskipTests
 
 # Copy the built jar to a new image
 FROM eclipse-temurin:21-jre-alpine
