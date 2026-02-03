@@ -138,7 +138,7 @@ const simulateBackend = async (config: any) => {
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 5000,
+  timeout: 60000,
 });
 
 api.interceptors.request.use(
