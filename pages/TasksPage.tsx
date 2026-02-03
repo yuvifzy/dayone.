@@ -9,21 +9,21 @@ const getTomorrowDate = () => {
   return tomorrow.toISOString().split('T')[0];
 };
 
-const TaskRow: React.FC<{ 
-  task: Task; 
+const TaskRow: React.FC<{
+  task: Task;
   onStatusToggle: (task: Task) => void;
+  onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
-}> = ({ task, onStatusToggle, onDelete }) => {
+}> = ({ task, onStatusToggle, onEdit, onDelete }) => {
   return (
     <div className="group flex items-center justify-between p-6 glass-panel rounded-3xl transition-all hover:scale-[1.01] hover:shadow-2xl dark:hover:border-oled-border/60">
       <div className="flex items-center gap-6 overflow-hidden">
-        <button 
+        <button
           onClick={() => onStatusToggle(task)}
-          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all btn-glow ${
-            task.status === TaskStatus.DONE 
-              ? 'bg-emerald-500 border-emerald-500 text-white' 
+          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all btn-glow ${task.status === TaskStatus.DONE
+              ? 'bg-emerald-500 border-emerald-500 text-white'
               : 'dark:border-oled-border border-gray-200 dark:hover:border-indigo-500 hover:border-indigo-500'
-          }`}
+            }`}
         >
           {task.status === TaskStatus.DONE && (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -42,7 +42,12 @@ const TaskRow: React.FC<{
         </div>
       </div>
       <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => onDelete(task.id)} className="p-2 text-gray-400 hover:text-rose-500 transition-colors btn-glow rounded-lg">
+        <button onClick={() => onEdit(task)} className="p-2 text-gray-400 hover:text-white transition-colors btn-glow rounded-lg bg-white/5">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+        </button>
+        <button onClick={() => onDelete(task.id)} className="p-2 text-gray-400 hover:text-rose-500 transition-colors btn-glow rounded-lg bg-white/5">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
         </button>
       </div>
@@ -57,6 +62,7 @@ const TasksPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'MEDIUM', status: TaskStatus.TODO, dueDate: getTomorrowDate() });
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     fetchTasks();
@@ -86,6 +92,19 @@ const TasksPage: React.FC = () => {
       setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: nextStatus } : t));
     } catch (err) {
       alert("Status mutation rejected by terminal.");
+    }
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask) return;
+
+    try {
+      await api.put(`/tasks/${editingTask.id}`, editingTask);
+      setTasks(prev => prev.map(t => t.id === editingTask.id ? editingTask : t));
+      setEditingTask(null);
+    } catch (err) {
+      alert("Update failed.");
     }
   };
 
@@ -121,7 +140,7 @@ const TasksPage: React.FC = () => {
           <h1 className="text-5xl font-black dark:text-white text-gray-900 tracking-tighter">Tasks Inventory</h1>
           <p className="text-gray-500 dark:text-gray-400 text-base mt-2 font-medium tracking-tight">Active mission-critical task tracking</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="px-8 py-4 bg-[#4f46e5] text-white font-black rounded-2xl btn-glow shadow-xl shadow-indigo-500/10 flex items-center gap-3 uppercase tracking-widest text-xs"
         >
@@ -144,7 +163,7 @@ const TasksPage: React.FC = () => {
 
       <div className="space-y-4">
         {filteredTasks.length > 0 ? (
-          filteredTasks.map(task => <TaskRow key={task.id} task={task} onStatusToggle={handleStatusToggle} onDelete={handleDelete} />)
+          filteredTasks.map(task => <TaskRow key={task.id} task={task} onStatusToggle={handleStatusToggle} onEdit={(t) => setEditingTask(t)} onDelete={handleDelete} />)
         ) : (
           <div className="h-[450px] flex flex-col items-center justify-center glass-panel border-2 border-dashed dark:border-oled-border border-gray-100 rounded-[4rem] text-center p-12 animate-fade-in">
             <div className="relative mb-10">
@@ -159,7 +178,7 @@ const TasksPage: React.FC = () => {
             <p className="max-w-md text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-10">
               No mission-critical tasks detected in this sector. This is your chance to initialize a new execution protocol.
             </p>
-            <button 
+            <button
               onClick={() => setIsModalOpen(true)}
               className="px-10 py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-[11px] transition-transform active:scale-95"
             >
@@ -183,30 +202,30 @@ const TasksPage: React.FC = () => {
             <form onSubmit={handleAddTask} className="p-12 space-y-10">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Objective Name</label>
-                <input 
-                  required 
-                  value={newTask.title} 
-                  onChange={e => setNewTask({...newTask, title: e.target.value})} 
-                  className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg focus:border-indigo-500 transition-colors" 
-                  placeholder="Task Name" 
+                <input
+                  required
+                  value={newTask.title}
+                  onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+                  className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg focus:border-indigo-500 transition-colors"
+                  placeholder="Task Name"
                 />
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Protocol Details</label>
-                <textarea 
-                  rows={3} 
-                  value={newTask.description} 
-                  onChange={e => setNewTask({...newTask, description: e.target.value})} 
-                  className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none focus:border-indigo-500 transition-colors" 
-                  placeholder="Requirements..." 
+                <textarea
+                  rows={3}
+                  value={newTask.description}
+                  onChange={e => setNewTask({ ...newTask, description: e.target.value })}
+                  className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none focus:border-indigo-500 transition-colors"
+                  placeholder="Requirements..."
                 />
               </div>
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Priority Tier</label>
-                  <select 
-                    value={newTask.priority} 
-                    onChange={e => setNewTask({...newTask, priority: e.target.value})} 
+                  <select
+                    value={newTask.priority}
+                    onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
                     className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px] focus:border-indigo-500 transition-colors"
                   >
                     <option value="LOW">Low Impact</option>
@@ -216,21 +235,62 @@ const TasksPage: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     required
-                    value={newTask.dueDate} 
-                    onChange={e => setNewTask({...newTask, dueDate: e.target.value})} 
-                    className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold focus:border-indigo-500 transition-colors" 
+                    value={newTask.dueDate}
+                    onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
+                    className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold focus:border-indigo-500 transition-colors"
                   />
                 </div>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="w-full py-6 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow uppercase tracking-[0.2em] text-sm mt-8 transition-transform active:scale-95 shadow-2xl shadow-indigo-500/30"
               >
                 Launch Execution
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT TASK MODAL */}
+      {editingTask && (
+        <div className="fixed inset-0 bg-black/60 glass-modal z-[100] flex items-center justify-center p-6 transition-all">
+          <div className="glass-modal rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-fade-in border dark:border-oled-border border-gray-100">
+            <div className="px-12 py-10 border-b dark:border-oled-border border-gray-50 flex justify-between items-center">
+              <h2 className="text-4xl font-black dark:text-white text-gray-900 tracking-tighter">Edit Task</h2>
+              <button onClick={() => setEditingTask(null)} className="p-3 text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-white/5"><svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <form onSubmit={handleUpdateTask} className="p-12 space-y-10">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Objective Name</label>
+                <input required value={editingTask.title} onChange={e => setEditingTask({ ...editingTask, title: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-bold text-lg" />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Description</label>
+                <textarea rows={3} value={editingTask.description} onChange={e => setEditingTask({ ...editingTask, description: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 border-gray-100 outline-none font-medium resize-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Priority Tier</label>
+                  <select value={editingTask.priority} onChange={e => setEditingTask({ ...editingTask, priority: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px]">
+                    <option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Status</label>
+                  <select value={editingTask.status} onChange={e => setEditingTask({ ...editingTask, status: e.target.value as TaskStatus })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-black uppercase tracking-widest text-[11px]">
+                    {Object.values(TaskStatus).map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Deadline</label>
+                <input type="date" required value={editingTask.dueDate} onChange={e => setEditingTask({ ...editingTask, dueDate: e.target.value })} className="w-full px-6 py-5 rounded-2xl border dark:bg-transparent dark:border-oled-border dark:text-white bg-white/50 outline-none font-bold" />
+              </div>
+              <button type="submit" className="w-full py-6 bg-indigo-500 text-white font-black rounded-3xl btn-glow uppercase tracking-[0.2em] text-sm mt-8 transition-transform active:scale-95 shadow-2xl shadow-indigo-500/30">Save Changes</button>
             </form>
           </div>
         </div>
