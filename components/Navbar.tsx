@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth, useTheme } from '../App';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { UserRole } from '../types';
 
 const Navbar: React.FC = () => {
@@ -36,7 +37,7 @@ const Navbar: React.FC = () => {
       </Link>
 
       <div className="flex items-center gap-8">
-        <button 
+        <button
           onClick={toggleDarkMode}
           className="p-2 rounded-xl transition-colors dark:hover:bg-oled-surface hover:bg-gray-100 text-gray-500 dark:text-gray-400"
           title="Toggle Theme"
@@ -74,7 +75,7 @@ const Navbar: React.FC = () => {
                   {getUserName()}
                 </span>
               </div>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="px-5 py-2 text-[13px] font-bold text-rose-500 border border-rose-100 dark:border-rose-900/30 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all uppercase tracking-widest"
               >
@@ -85,8 +86,8 @@ const Navbar: React.FC = () => {
         ) : (
           <div className="flex items-center gap-6">
             <Link to="/login" className="text-[13px] font-bold text-gray-400 dark:text-gray-500 hover:text-[#4f46e5] transition-colors uppercase tracking-widest">Sign in</Link>
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className="px-6 py-3 bg-[#4f46e5] text-white text-[13px] font-bold rounded-xl btn-glow shadow-lg shadow-indigo-100/10 uppercase tracking-widest"
             >
               Get Started

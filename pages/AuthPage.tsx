@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../App';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
 interface AuthPageProps {
@@ -14,7 +14,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login: performLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -46,18 +46,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
       const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
       const payload = mode === 'login' ? { email, password } : { name, email, password };
-      
+
       const response = await api.post(endpoint, payload);
       const { token, user } = response.data;
-      
+
       if (!token || !user) {
         throw new Error("Invalid terminal response payload.");
       }
@@ -71,7 +71,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
         status: err.response?.status,
         data: err.response?.data
       });
-      
+
       let displayMessage = 'PROTOCOL VIOLATION: Access Denied.';
 
       if (err.response?.data) {
@@ -79,10 +79,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
         // Multi-tier extraction with safety checks
         const extracted = data.message || data.error || data.statusText;
         if (extracted) displayMessage = safeString(extracted);
-      } 
+      }
       else if (err.code === 'ERR_NETWORK') {
         displayMessage = 'TERMINAL OFFLINE: Local DayOne Node (localhost:8080) unreachable.';
-      } 
+      }
       else if (err.message) {
         displayMessage = safeString(err.message);
       }
@@ -118,44 +118,44 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
           {mode === 'register' && (
             <div className="space-y-3">
               <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Operator Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 autoComplete="name"
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" 
-                placeholder="Full Name" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold"
+                placeholder="Full Name"
               />
             </div>
           )}
           <div className="space-y-3">
             <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Protocol ID (Email)</label>
-            <input 
-              type="email" 
-              required 
+            <input
+              type="email"
+              required
               autoComplete="email"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" 
-              placeholder="id@dayone.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold"
+              placeholder="id@dayone.com"
             />
           </div>
           <div className="space-y-3">
             <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Access Key (Password)</label>
-            <input 
-              type="password" 
-              required 
+            <input
+              type="password"
+              required
               autoComplete={mode === 'login' ? "current-password" : "new-password"}
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold" 
-              placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-6 py-4 rounded-2xl border transition-all dark:bg-oled-surface dark:border-oled-border dark:text-white bg-gray-50 border-gray-100 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-[#4f46e5] font-bold"
+              placeholder="••••••••"
             />
           </div>
-          <button 
-            type="submit" 
-            disabled={loading} 
+          <button
+            type="submit"
+            disabled={loading}
             className="w-full py-5 bg-[#4f46e5] text-white font-black rounded-3xl btn-glow shadow-2xl shadow-indigo-500/20 uppercase tracking-[0.2em] text-sm mt-4 disabled:opacity-50 flex items-center justify-center gap-3 transition-transform active:scale-[0.98]"
           >
             {loading ? (

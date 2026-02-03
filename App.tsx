@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthState, User, UserRole } from './types';
 import LandingPage from './pages/LandingPage';
@@ -10,35 +10,12 @@ import StudyAssistant from './pages/StudyAssistant';
 import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import api from './services/api';
-
-interface ThemeContextType {
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error('useTheme must be used within a ThemeProvider');
-  return context;
-};
-
-interface AuthContextType {
-  auth: AuthState;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
-  return context;
-};
+import { AuthContext, useAuth } from './context/AuthContext';
+import { ThemeContext } from './context/ThemeContext';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode, adminOnly?: boolean }> = ({ children, adminOnly = false }) => {
   const { auth } = useAuth();
-  
+
   if (auth.loading) {
     return (
       <div className="flex h-screen items-center justify-center dark:bg-black bg-white">
@@ -49,10 +26,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode, adminOnly?: boolean 
       </div>
     );
   }
-  
+
   if (!auth.isAuthenticated) return <Navigate to="/login" replace />;
   if (adminOnly && auth.user?.role !== UserRole.ADMIN) return <Navigate to="/dashboard" replace />;
-  
+
   return <>{children}</>;
 };
 
@@ -128,37 +105,37 @@ const App: React.FC = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<AuthPage mode="login" />} />
                 <Route path="/register" element={<AuthPage mode="register" />} />
-                <Route 
-                  path="/dashboard" 
+                <Route
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/tasks" 
+                <Route
+                  path="/tasks"
                   element={
                     <ProtectedRoute>
                       <TasksPage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/study" 
+                <Route
+                  path="/study"
                   element={
                     <ProtectedRoute>
                       <StudyAssistant />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/admin" 
+                <Route
+                  path="/admin"
                   element={
                     <ProtectedRoute adminOnly>
                       <AdminDashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
               </Routes>
             </main>

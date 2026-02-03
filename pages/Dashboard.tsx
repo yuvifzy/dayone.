@@ -4,7 +4,7 @@ import { Task, TaskStatus } from '../types';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../services/api';
-import { useAuth } from '../App';
+import { useAuth } from '../context/AuthContext';
 
 const getTomorrowDate = () => {
   const tomorrow = new Date();
