@@ -51,11 +51,11 @@ const Dashboard: React.FC = () => {
   ];
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find(t => String(t.id) === String(taskId));
     if (!task) return;
 
     // Optimistic Update: Update UI immediately
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    setTasks(prev => prev.map(t => String(t.id) === String(taskId) ? { ...t, status: newStatus } : t));
 
     try {
       const updatedTask = { ...task, status: newStatus };
@@ -63,7 +63,8 @@ const Dashboard: React.FC = () => {
     } catch (err) {
       console.error("Failed to update task status", err);
       // Revert on failure
-      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: task.status } : t));
+      // Revert on failure
+      setTasks(prev => prev.map(t => String(t.id) === String(taskId) ? { ...t, status: task.status } : t));
       alert("Operation failed. Syncing error.");
     }
   };
@@ -138,7 +139,7 @@ const Dashboard: React.FC = () => {
     const newStatus = destination.droppableId as TaskStatus;
 
     if (source.droppableId !== destination.droppableId) {
-      handleStatusChange(draggableId, newStatus);
+      handleStatusChange(String(draggableId), newStatus);
     }
   };
 

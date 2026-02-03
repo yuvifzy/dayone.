@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 /**
  * STRATEGIC CONTINUITY LAYER
@@ -157,11 +157,8 @@ api.interceptors.response.use(
 
     // Direct redirection for Network Errors or specific dev-preview conditions
     if (!error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-      try {
-        return await simulateBackend(originalRequest);
-      } catch (simError) {
-        return Promise.reject(simError);
-      }
+      // Force fail instead of simulating
+      return Promise.reject(error);
     }
 
     // Auto-logout on valid 401 responses from real backend
