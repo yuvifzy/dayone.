@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 /**
  * STRATEGIC CONTINUITY LAYER
@@ -19,7 +19,7 @@ const setLocalStore = (key: string, data: any) => localStorage.setItem(`dayone_$
 
 const simulateBackend = async (config: any) => {
   const { url, method, data: rawData } = config;
-  
+
   let data = rawData;
   if (typeof rawData === 'string' && rawData.length > 0) {
     try {
@@ -71,7 +71,7 @@ const simulateBackend = async (config: any) => {
     }
     const user = users.find((u: any) => u.email === data?.email && u.password === data?.password);
     if (!user) throw createSimError('AUTHENTICATION FAILED: Invalid Protocol ID or Access Key.', 401);
-    
+
     const { password, ...userSafe } = user;
     const token = `sim_jwt_${btoa(JSON.stringify(userSafe))}`;
     return createSimResponse({ token, user: userSafe });
@@ -81,10 +81,10 @@ const simulateBackend = async (config: any) => {
   if (url.includes('/auth/me')) {
     const token = localStorage.getItem('token');
     if (!token) throw createSimError('Session Required', 401);
-    
+
     // If it's a real token but we're in simulation, we can't verify it. Reset.
     if (!token.startsWith('sim_jwt_')) {
-       throw createSimError('Backend Session Mismatch. Please re-authenticate.', 401);
+      throw createSimError('Backend Session Mismatch. Please re-authenticate.', 401);
     }
 
     try {
@@ -99,14 +99,14 @@ const simulateBackend = async (config: any) => {
   if (url.includes('/tasks')) {
     const token = localStorage.getItem('token');
     if (!token) throw createSimError('Access Denied', 401);
-    
+
     let userId = 'demo';
     try {
       if (token.startsWith('sim_jwt_')) {
         userId = JSON.parse(atob(token.split('_')[2])).id;
       }
-    } catch (e) {}
-    
+    } catch (e) { }
+
     let tasks = getLocalStore('tasks');
 
     if (method === 'get') {
