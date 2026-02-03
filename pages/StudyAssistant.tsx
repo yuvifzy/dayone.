@@ -150,7 +150,7 @@ const StudyAssistant: React.FC = () => {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash-lite",
+        model: "gemini-flash-latest",
         systemInstruction: 'You are an elite study strategist for high-performance engineering students. You despise generic advice. You provide precise, science-backed technical study protocols.',
       });
 

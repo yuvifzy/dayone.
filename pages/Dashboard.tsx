@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
       const result = await model.generateContent(`Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"`);
       const response = await result.response;
       alert(`DayOne Strategic breakdown:\n\n${response.text()}`);
