@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '../types';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import api from '../services/api';
 import { useAuth } from '../App';
@@ -85,17 +85,11 @@ const Dashboard: React.FC = () => {
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"` }]
-          }
-        ],
-      });
-      alert(`DayOne Strategic breakdown:\n\n${response.text}`);
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(`Break down this task into 3 specific actionable sub-steps for a technical professional: "${taskTitle}"`);
+      const response = await result.response;
+      alert(`DayOne Strategic breakdown:\n\n${response.text()}`);
     } catch (err: any) {
       console.error("Gemini Error:", err);
       alert(`AI Intelligence currently offline. ${err.message || ''}`);

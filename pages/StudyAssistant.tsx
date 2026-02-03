@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * AIResponseRenderer
@@ -148,7 +148,12 @@ const StudyAssistant: React.FC = () => {
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: 'You are an elite study strategist for high-performance engineering students. You despise generic advice. You provide precise, science-backed technical study protocols.',
+      });
+
       const prompt = `
         STRATEGIC CONTEXT:
         - Struggle: ${struggle}
@@ -166,26 +171,16 @@ const StudyAssistant: React.FC = () => {
         STYLE: Professional, technical, zero-fluff, actionable. Use standard bullet points for lists.
       `;
 
-      const result = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        config: {
-          systemInstruction: 'You are an elite study strategist for high-performance engineering students. You despise generic advice. You provide precise, science-backed technical study protocols.',
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
           temperature: 0.4,
           topP: 0.8,
-        },
+        }
       });
 
-      const text = result.text || 'Protocol generation failed. Retry.';
+      const response = result.response;
+      const text = response.text() || 'Protocol generation failed. Retry.';
       setResponse(text);
       saveToPersistence(text);
     } catch (err: any) {
